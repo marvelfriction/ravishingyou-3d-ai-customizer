@@ -31,12 +31,35 @@ const Customizer = () => {
         return <FilePicker
           file={file}
           setFile={setFile}
+          readFile={readFile}
         />
       case "aipicker":
         return <AIPicker />
           
       default:
         return null;
+    }
+  }
+
+  const handleDecals = (type, result) => {
+    const decalType = DecalTypes[type]
+    state[decalType.stateProperty] = result
+
+    if (!activeFilterTab[decalType.filterTab]) {
+      handleActiveFilterTab(decalType.filterTab)
+    }
+  }
+
+  const handleActiveFilterTab = (tabName) => {
+    switch (tabName) {
+      case "logoShirt":
+        state.isLogoTexture = !activeFilterTab[tabName]
+        break;
+      case "stylishShirt":
+        state.isFullTexture = !activeFilterTab[tabName]
+      default:
+        state.isLogoTexture = true
+        state.isFullTexture = false
     }
   }
 
@@ -47,6 +70,36 @@ const Customizer = () => {
   //       setActiveEditorTab("")
   //     })
   // }
+
+  const readFile = (type) => {
+    if (!(file instanceof Blob)) {
+      // Convert non-Blob files to Blob before reading
+      const blobFile = new Blob([file]);
+      reader(blobFile)
+        .then((result) => {
+          handleDecals(type, result);
+          setActiveEditorTab("");
+        })
+        .catch((error) => {
+          console.error("Error reading file:", error);
+          // Handle error if occurred during file reading
+          alert("Error reading file. Please try again.");
+        });
+    } else {
+      // File is already a Blob, proceed with reading
+      reader(file)
+        .then((result) => {
+          handleDecals(type, result);
+          setActiveEditorTab("");
+        })
+        .catch((error) => {
+          console.error("Error reading file:", error);
+          // Handle error if occurred during file reading
+          alert("Error reading file. Please try again.");
+        });
+    }
+  };
+
 
     return (
       <AnimatePresence>
